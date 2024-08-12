@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="13.5dp"
+    android:background="@drawable/ripple_item_background"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Device Name -->
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/deviceName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Device Name"
+        android:textSize="16sp"
+        android:theme="@style/Heading3Theme"
+        android:textStyle="bold" />
+
+</RelativeLayout>

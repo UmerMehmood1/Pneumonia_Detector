@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    >
+    <!--Top Menu Bar-->
+    <RelativeLayout
+        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="16dp"
+        android:id="@+id/top_menu"
+        android:layout_alignParentTop="true"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <ImageButton
+            android:id="@+id/menu_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/menu"
+            android:backgroundTint="@color/white"
+            android:background="@drawable/ripple_item_background"
+            android:padding="8dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:visibility="visible"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/menu_button"
+            android:text="Sensors Data"
+            android:theme="@style/Heading1Theme" />
+    </RelativeLayout>
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_marginHorizontal="16dp"
+        android:id="@+id/title"
+        android:layout_marginVertical="16dp"
+        android:layout_below="@id/top_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Real-time devices"
+        android:layout_alignParentStart="true"
+        android:theme="@style/Heading2Theme"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/DeviceRecyclerView"
+        android:layout_marginHorizontal="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="64dp"
+        android:layout_below="@id/title"/>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/addButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@id/refreshDevice"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@color/addButtonColor"
+        android:src="@drawable/round_add_24"
+        app:tint="@color/white"
+        app:rippleColor="@color/button_color"
+        />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/refreshDevice"
+        android:layout_width="match_parent"
+        android:layout_marginHorizontal="16dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/button_color"
+        android:text="Refresh"
+        app:rippleColor="@color/addButtonColor"
+        android:layout_marginBottom="10dp"
+        android:textColor="@color/black"
+        app:cornerRadius="10dp"
+        />
+</RelativeLayout>

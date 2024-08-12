@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+    <!--Top Menu Bar-->
+    <RelativeLayout
+        android:id="@+id/top_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp">
+
+        <ImageButton
+            android:id="@+id/back_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/ripple_item_background"
+            android:backgroundTint="@color/white"
+            android:padding="8dp"
+            android:src="@drawable/round_keyboard_backspace_24"
+            android:visibility="visible" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/back_button"
+            android:text="Sensors Data"
+            android:theme="@style/Heading1Theme" />
+    </RelativeLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/screenContentLayout"
+        android:layout_above="@+id/predictButton"
+        android:layout_below="@id/top_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="16dp"
+                android:text="Live Data"
+                android:theme="@style/Heading2Theme" />
+            <LinearLayout
+                android:id="@+id/sensorDataLayout"
+                android:layout_below="@id/title"
+                android:layout_width="match_parent"
+                android:orientation="vertical"
+                android:layout_height="300dp">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="13.5dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/ripple_item_background">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <!-- Sensor Name -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/mq6Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_alignParentTop="true"
+                            android:text="Methane"
+                            android:textSize="16sp"
+                            android:theme="@style/Heading3Theme"
+                            android:textStyle="bold" />
+
+                        <!-- Sensor Details (Temperature and Humidity) -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/mq6lastUpdated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/mq6Name"
+                            android:layout_marginStart="8dp"
+                            android:text="12:46 PM"
+                            android:theme="@style/RegularTextTheme"
+                            android:textSize="14sp" />
+
+                    </RelativeLayout>
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mq6Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.000ppm"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:theme="@style/RegularTextTheme"
+                        android:textColor="@color/black"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="13.5dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/ripple_item_background">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <!-- Sensor Name -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/mq9Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_alignParentTop="true"
+                            android:text="Carbon Monoxide"
+                            android:textSize="16sp"
+                            android:theme="@style/Heading3Theme"
+                            android:textStyle="bold" />
+
+                        <!-- Sensor Details (Temperature and Humidity) -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/mq9lastUpdated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/mq9Name"
+                            android:layout_marginStart="8dp"
+                            android:text="12:46 PM"
+                            android:theme="@style/RegularTextTheme"
+                            android:textSize="14sp" />
+
+                    </RelativeLayout>
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mq9Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.000ppm"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:theme="@style/RegularTextTheme"
+                        android:textColor="@color/black"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="13.5dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/ripple_item_background">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <!-- Sensor Name -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/mq135Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_alignParentTop="true"
+                            android:text="Ammonia"
+                            android:textSize="16sp"
+                            android:theme="@style/Heading3Theme"
+                            android:textStyle="bold" />
+
+                        <!-- Sensor Details (Temperature and Humidity) -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/mq135lastUpdated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/mq135Name"
+                            android:layout_marginStart="8dp"
+                            android:text="12:46 PM"
+                            android:theme="@style/RegularTextTheme"
+                            android:textSize="14sp" />
+
+                    </RelativeLayout>
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/mq135Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.000ppm"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:theme="@style/RegularTextTheme"
+                        android:textColor="@color/black"/>
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingVertical="16dp"
+                    android:paddingHorizontal="13.5dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/ripple_item_background">
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                        <!-- Sensor Name -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tgs2602Name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:layout_alignParentTop="true"
+                            android:text="Volatile Organic Compound"
+                            android:textSize="16sp"
+                            android:theme="@style/Heading3Theme"
+                            android:textStyle="bold" />
+
+                        <!-- Sensor Details (Temperature and Humidity) -->
+                        <com.google.android.material.textview.MaterialTextView
+                            android:id="@+id/tgs2602lastUpdated"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/tgs2602Name"
+                            android:layout_marginStart="8dp"
+                            android:text="12:46 PM"
+                            android:theme="@style/RegularTextTheme"
+                            android:textSize="14sp" />
+
+                    </RelativeLayout>
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/tgs2602Value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0.000ppm"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:theme="@style/RegularTextTheme"
+                        android:textColor="@color/black"/>
+                </RelativeLayout>
+
+            </LinearLayout>
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/prediction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:theme="@style/Heading1Theme"
+                android:text="Prediction"
+                android:layout_below="@id/sensorDataLayout"
+                android:layout_alignParentStart="true"
+                android:layout_marginHorizontal="16dp"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:background="@drawable/default_prediction_result_background"
+                android:textAlignment="center"
+                android:id="@+id/predictionValue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/prediction"
+                android:padding="16dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_centerHorizontal="true"
+                android:text="Test result will be shown here"
+                android:textColor="@color/RegularTextColor"
+                android:theme="@style/Heading2Theme" />
+
+        </RelativeLayout>
+    </androidx.core.widget.NestedScrollView>
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/predictButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="16dp"
+        android:layout_marginBottom="10dp"
+        android:backgroundTint="@color/addButtonColor"
+        android:text="Predict"
+        android:theme="@style/RegularTextTheme"
+        app:cornerRadius="10dp"
+        app:rippleColor="@color/button_color" />
+
+</RelativeLayout>

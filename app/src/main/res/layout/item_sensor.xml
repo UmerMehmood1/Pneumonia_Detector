@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="13.5dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@drawable/ripple_item_background">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <!-- Sensor Name -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/sensorName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_alignParentTop="true"
+            android:text="Sensor Name"
+            android:textSize="16sp"
+            android:theme="@style/Heading3Theme"
+            android:textStyle="bold" />
+
+        <!-- Sensor Details (Temperature and Humidity) -->
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/lastUpdated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/sensorName"
+            android:layout_marginStart="8dp"
+            android:text="12:46 PM"
+            android:theme="@style/RegularTextTheme"
+            android:textSize="14sp" />
+
+    </RelativeLayout>
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/sensorValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0.000ppm"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:theme="@style/RegularTextTheme"
+        android:textColor="@color/black"/>
+</RelativeLayout>
