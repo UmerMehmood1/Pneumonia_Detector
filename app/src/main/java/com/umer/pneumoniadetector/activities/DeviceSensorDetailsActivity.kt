@@ -213,7 +213,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.LEFT
         }
-        canvas.drawText("Sensor Data:", 50f, yPosition, paint)
+        canvas.drawText("Report Data:", 50f, yPosition, paint)
         yPosition += 30f
 
         // Sensor Data
@@ -267,5 +267,10 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         } else {
             Log.e("SharePDF", "Invalid file path.")
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        pneumoniaPredictor.close()
     }
 }
