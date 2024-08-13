@@ -1,3 +1,5 @@
+package com.umer.pneumoniadetector.utils
+
 import android.content.Context
 import com.umer.pneumoniadetector.ml.PneumoniaModel
 import org.tensorflow.lite.DataType

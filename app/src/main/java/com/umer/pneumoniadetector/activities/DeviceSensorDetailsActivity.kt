@@ -1,6 +1,6 @@
 package com.umer.pneumoniadetector.activities
 
-import PneumoniaPredictor
+import com.umer.pneumoniadetector.utils.PneumoniaPredictor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -157,18 +157,18 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
                 val data = snapshot.value as? Map<*, *>
+                Snackbar.make(binding.root, "Data: $data", Snackbar.LENGTH_SHORT).show()
                 val mq135Value = data?.get("MQ135")?.toString()?.toFloatOrNull() ?: 0f
                 val mq6Value = data?.get("MQ6")?.toString()?.toFloatOrNull() ?: 0f
                 val mq9Value = data?.get("MQ9")?.toString()?.toFloatOrNull() ?: 0f
                 val tgs2602Value = data?.get("TGS2602")?.toString()?.toFloatOrNull() ?: 0f
-
-                Log.d("FirebaseData", "MQ135: $mq135Value, MQ6: $mq6Value, MQ9: $mq9Value, TGS2602: $tgs2602Value")
 
                 binding.mq135Value.text = "${mq135Value}ppm"
                 binding.mq6Value.text = "${mq6Value}ppm"
                 binding.mq9Value.text = "${mq9Value}ppm"
                 binding.tgs2602Value.text = "${tgs2602Value}ppm"
                 binding.predictButton.isEnabled = true
+
             }
 
             override fun onCancelled(error: com.google.firebase.database.DatabaseError) {

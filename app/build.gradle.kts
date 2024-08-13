@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.ir.backend.js.compile
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -16,8 +18,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
+        }
     }
-
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -44,11 +48,16 @@ android {
 
 dependencies {
 //    For Model Integration using Tensor Lite flow
-    implementation(libs.tensorflow.lite)
+//    implementation(libs.tensorflow.lite) // Use the latest stable version
+
     // Optional: For GPU acceleration
-    implementation(libs.tensorflow.lite.gpu)
+//    implementation(libs.tensorflow.lite.gpu)
     // Optional: For model optimization
-    implementation(libs.tensorflow.lite.support)
+//    implementation(libs.tensorflow.lite.support)
+    implementation("org.tensorflow:tensorflow-lite:2.10.0")
+    implementation ("org.tensorflow:tensorflow-lite-gpu:2.10.0")
+    implementation ("org.tensorflow:tensorflow-lite-support:0.4.3")
+    implementation ("org.tensorflow:tensorflow-lite-metadata:0.4.3")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
