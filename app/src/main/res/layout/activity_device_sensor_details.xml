@@ -273,17 +273,35 @@
 
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/predictButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
-        android:layout_marginBottom="10dp"
-        android:backgroundTint="@color/addButtonColor"
-        android:text="Predict"
-        android:theme="@style/RegularTextTheme"
-        app:cornerRadius="10dp"
-        app:rippleColor="@color/button_color" />
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:weightSum="1">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/predictButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="10dp"
+            android:backgroundTint="@color/addButtonColor"
+            android:text="Predict"
+            android:theme="@style/RegularTextTheme"
+            app:cornerRadius="10dp"
+            app:rippleColor="@color/button_color" />
+        <ImageButton
+            android:visibility="gone"
+            android:id="@+id/shareResult"
+            android:background="@drawable/ripple_item_background"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:src="@drawable/rounded_share_windows_24"
+            android:padding="16dp"
+            />
+    </LinearLayout>
 
 </RelativeLayout>

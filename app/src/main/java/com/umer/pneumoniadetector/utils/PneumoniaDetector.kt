@@ -9,14 +9,17 @@ import java.io.IOException
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import android.content.res.AssetFileDescriptor
+import android.util.Log
+import android.widget.Toast
+import com.google.android.material.snackbar.Snackbar
 
-class ModelInterpreter(context: Context) {
+class PneumoniaDetector(context: Context) {
 
     private var interpreter: Interpreter = Interpreter(loadModelFile(context))
     private val inputBuffer: TensorBuffer = TensorBuffer.createFixedSize(intArrayOf(1, 4), DataType.FLOAT32)
-    private val outputBuffer: TensorBuffer = TensorBuffer.createFixedSize(intArrayOf(1, 2), DataType.FLOAT32)
+    private val outputBuffer: TensorBuffer = TensorBuffer.createFixedSize(intArrayOf(1, 1), DataType.FLOAT32)
 
-    // Load the model file from assets
+    // Load the TensorFlow Lite model from assets
     @Throws(IOException::class)
     private fun loadModelFile(context: Context): MappedByteBuffer {
         val fileDescriptor: AssetFileDescriptor = context.assets.openFd("pneumonia_model.tflite")
@@ -27,8 +30,8 @@ class ModelInterpreter(context: Context) {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
     }
 
-    // Method to set input data as individual parameters and get predictions
-    fun predict(mq6: Float, mq9: Float, mq135: Float, tgs2602: Float): Int {
+    // Method to set input data and get predictions
+    fun predict(context: Context, mq6: Float, mq9: Float, mq135: Float, tgs2602: Float): Int {
         // Load the input data into the input buffer
         val inputData = floatArrayOf(mq6, mq9, mq135, tgs2602)
         inputBuffer.loadArray(inputData)
@@ -36,10 +39,14 @@ class ModelInterpreter(context: Context) {
         // Run inference
         interpreter.run(inputBuffer.buffer, outputBuffer.buffer.rewind())
 
-        // Retrieve and process the output
+        // Retrieve the output, which is a probability between 0 and 1
         val outputData = outputBuffer.floatArray
-        // Assuming output is in the form [prob_negative, prob_positive]
-        return if (outputData[1] > outputData[0]) 1 else 0
+        outputData.forEach {
+            Toast.makeText(context, "Confidence Score: $it", Toast.LENGTH_SHORT).show();
+        }
+
+        // Return 1 if probability > 0.8 (Pneumonia), otherwise 0 (Normal)
+        return if (outputData[0] > 0.8) 1 else 0
     }
 
     // Optional: Close the interpreter when done

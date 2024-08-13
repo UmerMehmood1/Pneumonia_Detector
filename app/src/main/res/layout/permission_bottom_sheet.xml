@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:background="@drawable/rounded_white_background"
+    android:id="@+id/choosetxt"
+    android:gravity="center_horizontal"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:background="?selectableItemBackground"
+        android:clickable="true"
+        android:contentDescription="@null"
+        android:focusable="true"
+        android:id="@+id/close_btn"
+        android:layout_alignParentEnd="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/rounded_close_24"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"/>
+
+    <TextView
+        android:layout_marginTop="8dp"
+        style="@style/Heading1Theme"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/promptText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Permission Required"
+        />
+
+    <TextView
+        style="@style/Heading2Theme"
+        android:layout_marginHorizontal="16dp"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/descriptionText"
+        android:layout_below="@id/promptText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:text="Allow write permission to share the result"
+        android:layout_marginTop="30dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/descriptionText"
+        android:backgroundTint="@color/addButtonColor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:paddingHorizontal="100dp"
+        android:text="Settings"
+        android:paddingRight="15dp"
+        android:paddingLeft="15dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="30dp"
+        android:id="@+id/settingButton"/>
+</RelativeLayout>
