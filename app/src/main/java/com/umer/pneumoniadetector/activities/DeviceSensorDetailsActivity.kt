@@ -13,6 +13,8 @@ import android.graphics.pdf.PdfDocument
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View.VISIBLE
@@ -24,8 +26,11 @@ import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.umer.pneumoniadetector.R
 import com.umer.pneumoniadetector.bottomSheets.PermissionBottomSheet
 import com.umer.pneumoniadetector.bottomSheets.PermissionListener
@@ -51,7 +56,6 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         pneumoniaPredictor = PneumoniaPredictor(this)
         setupListeners()
         registerActivityResults()
-        binding.predictButton.isEnabled = false
     }
 
     private fun setupInsets() {
@@ -64,6 +68,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
     private fun initializeFirebase() {
         databaseReference = FirebaseDatabase.getInstance().reference
+        Log.d("Firebase", "Firebase initialized $databaseReference")
         readDataFromFirebase()
     }
 
@@ -153,29 +158,41 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     }
 
     private fun readDataFromFirebase() {
-        databaseReference.addValueEventListener(object : com.google.firebase.database.ValueEventListener {
-            @SuppressLint("SetTextI18n")
-            override fun onDataChange(snapshot: com.google.firebase.database.DataSnapshot) {
-                val data = snapshot.value as? Map<*, *>
-                Snackbar.make(binding.root, "Data: $data", Snackbar.LENGTH_SHORT).show()
-                val mq135Value = data?.get("MQ135")?.toString()?.toFloatOrNull() ?: 0f
-                val mq6Value = data?.get("MQ6")?.toString()?.toFloatOrNull() ?: 0f
-                val mq9Value = data?.get("MQ9")?.toString()?.toFloatOrNull() ?: 0f
-                val tgs2602Value = data?.get("TGS2602")?.toString()?.toFloatOrNull() ?: 0f
+        Log.d("Firebase", "Reading data from Firebase")
+        databaseReference.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                Log.d("Firebase", "Snapshot: ${snapshot.value}")
+                if (snapshot.exists()) {
+                    val data = snapshot.value as? Map<*, *>
+                    if (data != null) {
+                        val mq135Value = data["MQ135"]?.toString()?.toFloatOrNull() ?: 0f
+                        val mq6Value = data["MQ6"]?.toString()?.toFloatOrNull() ?: 0f
+                        val mq9Value = data["MQ9"]?.toString()?.toFloatOrNull() ?: 0f
+                        val tgs2602Value = data["TGS2602"]?.toString()?.toFloatOrNull() ?: 0f
 
-                binding.mq135Value.text = "${mq135Value}ppm"
-                binding.mq6Value.text = "${mq6Value}ppm"
-                binding.mq9Value.text = "${mq9Value}ppm"
-                binding.tgs2602Value.text = "${tgs2602Value}ppm"
-                binding.predictButton.isEnabled = true
+                        Handler(Looper.getMainLooper()).post {
+                            binding.mq135Value.text = "${mq135Value}ppm"
+                            binding.mq6Value.text = "${mq6Value}ppm"
+                            binding.mq9Value.text = "${mq9Value}ppm"
+                            binding.tgs2602Value.text = "${tgs2602Value}ppm"
+                        }
 
+                        Log.d("Firebase", "MQ135: $mq135Value, MQ6: $mq6Value, MQ9: $mq9Value, TGS2602: $tgs2602Value")
+                    } else {
+                        Log.d("Firebase", "Data map is null or not of expected type")
+                    }
+                } else {
+                    Log.d("Firebase", "No data available")
+                }
             }
 
-            override fun onCancelled(error: com.google.firebase.database.DatabaseError) {
-                Snackbar.make(binding.root, "Failed to read data from Firebase", Snackbar.LENGTH_SHORT).show()
+            override fun onCancelled(error: DatabaseError) {
+                Log.d("Firebase", "Error reading data from Firebase", error.toException())
+                Snackbar.make(binding.root, "Error: ${error.message}", Snackbar.LENGTH_SHORT).show()
             }
         })
     }
+
 
     private fun createPdf(mq6: Float, mq9: Float, mq135: Float, tgs2602: Float, predictionResult: Int): String {
         val pdfDocument = PdfDocument()

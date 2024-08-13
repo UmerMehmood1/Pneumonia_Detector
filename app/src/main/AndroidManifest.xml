@@ -20,6 +20,7 @@
             android:name=".activities.DeviceSensorDetailsActivity"
             android:exported="false" />
         <activity
+            android:theme="@style/Theme.PneumoniaDetector"
             android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>

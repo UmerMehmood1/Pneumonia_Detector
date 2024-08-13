@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Base.Theme.PneumoniaDetector"
     android:background="@color/white"
     >
     <!--Top Menu Bar-->
@@ -61,7 +62,7 @@
         android:layout_marginBottom="16dp"
         android:backgroundTint="@color/addButtonColor"
         android:src="@drawable/round_add_24"
-        app:tint="@color/white"
+        app:tint="@color/black"
         app:rippleColor="@color/button_color"
         />
 
