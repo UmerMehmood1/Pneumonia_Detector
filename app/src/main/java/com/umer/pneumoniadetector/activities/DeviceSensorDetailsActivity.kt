@@ -1,6 +1,5 @@
 package com.umer.pneumoniadetector.activities
 
-import com.umer.pneumoniadetector.utils.PneumoniaPredictor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -15,8 +14,6 @@ import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.View.GONE
@@ -40,6 +37,7 @@ import com.umer.pneumoniadetector.bottomSheets.PermissionListener
 import com.umer.pneumoniadetector.databinding.ActivityDeviceSensorDetailsBinding
 import com.umer.pneumoniadetector.listeners.OnInternetStateChanged
 import com.umer.pneumoniadetector.recievers.NetworkChangeReceiver
+import com.umer.pneumoniadetector.utils.PneumoniaPredictor
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -61,6 +59,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         initializeFirebase()
         pneumoniaPredictor = PneumoniaPredictor(this)
         networkChangeReceiver = NetworkChangeReceiver(object : OnInternetStateChanged{
+            @SuppressLint("SetTextI18n")
             override fun onConnected() {
                 binding.internetState.animate().alpha(0f).setDuration(300).start()
                 binding.internetState.text = "Internet Connected"
@@ -69,6 +68,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
                 binding.internetState.visibility = GONE
             }
 
+            @SuppressLint("SetTextI18n")
             override fun onDisconnected() {
                 binding.internetState.visibility = VISIBLE
                 binding.internetState.animate().alpha(1f).setDuration(300).start()
@@ -124,6 +124,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         updatePredictionUI(prediction)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun updatePredictionUI(prediction: Int) {
         if (prediction == 1) {
             binding.predictionValue.text = "Pneumonia Detected"
@@ -173,15 +174,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             }
 
         settingsLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                if (ContextCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    // Permission granted, no action needed
-                }
-            }
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     }
 
     private fun showRationaleDialog() {
