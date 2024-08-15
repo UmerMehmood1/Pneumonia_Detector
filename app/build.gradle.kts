@@ -18,9 +18,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-//        ndk {
-//            abiFilters.addAll(listOf("arm64-v8a", "armeabi-v7a", "x86", "x86_64"))
-//        }
     }
     buildTypes {
         release {
@@ -47,13 +44,6 @@ android {
 }
 
 dependencies {
-//    For Model Integration using Tensor Lite flow
-//    implementation(libs.tensorflow.lite) // Use the latest stable version
-
-    // Optional: For GPU acceleration
-//    implementation(libs.tensorflow.lite.gpu)
-    // Optional: For model optimization
-//    implementation(libs.tensorflow.lite.support)
     implementation("org.tensorflow:tensorflow-lite:2.10.0")
     implementation ("org.tensorflow:tensorflow-lite-gpu:2.10.0")
     implementation ("org.tensorflow:tensorflow-lite-support:0.4.3")

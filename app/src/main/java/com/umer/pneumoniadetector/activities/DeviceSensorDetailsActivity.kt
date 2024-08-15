@@ -4,12 +4,14 @@ import com.umer.pneumoniadetector.utils.PneumoniaPredictor
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -17,6 +19,7 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.View.GONE
 import android.view.View.VISIBLE
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -35,6 +38,8 @@ import com.umer.pneumoniadetector.R
 import com.umer.pneumoniadetector.bottomSheets.PermissionBottomSheet
 import com.umer.pneumoniadetector.bottomSheets.PermissionListener
 import com.umer.pneumoniadetector.databinding.ActivityDeviceSensorDetailsBinding
+import com.umer.pneumoniadetector.listeners.OnInternetStateChanged
+import com.umer.pneumoniadetector.recievers.NetworkChangeReceiver
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
@@ -46,6 +51,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     private lateinit var databaseReference: DatabaseReference
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
     private lateinit var settingsLauncher: ActivityResultLauncher<Intent>
+    private lateinit var networkChangeReceiver: NetworkChangeReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,9 +60,28 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         setupInsets()
         initializeFirebase()
         pneumoniaPredictor = PneumoniaPredictor(this)
+        networkChangeReceiver = NetworkChangeReceiver(object : OnInternetStateChanged{
+            override fun onConnected() {
+                binding.internetState.animate().alpha(0f).setDuration(300).start()
+                binding.internetState.text = "Internet Connected"
+                binding.internetState.setBackgroundColor(getColor(R.color.addButtonColor))
+                readDataFromFirebase()
+                binding.internetState.visibility = GONE
+            }
+
+            override fun onDisconnected() {
+                binding.internetState.visibility = VISIBLE
+                binding.internetState.animate().alpha(1f).setDuration(300).start()
+                binding.internetState.text = "Please connect internet to get live data"
+                binding.internetState.setBackgroundColor(getColor(R.color.red))
+            }
+        })
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(networkChangeReceiver, filter)
         setupListeners()
         registerActivityResults()
     }
+
 
     private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -74,7 +99,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
     @SuppressLint("SetTextI18n")
     private fun setupListeners() {
-        binding.backButton.setOnClickListener { finish() }
+//        binding.backButton.setOnClickListener { finish() }
         binding.predictButton.setOnClickListener { onPredictButtonClick() }
         binding.shareResult.setOnClickListener { onShareResultClick() }
     }
@@ -83,7 +108,8 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         val mq6Value = binding.mq6Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
         val mq9Value = binding.mq9Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
         val mq135Value = binding.mq135Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-        val tgs2602Value = binding.tgs2602Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+        val tgs2602Value =
+            binding.tgs2602Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
 
         // Convert sensor values to ByteBuffer
         val byteBuffer = ByteBuffer.allocate(4 * 4).apply {
@@ -92,7 +118,8 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
         // Make prediction
         val outputBuffer = pneumoniaPredictor.predict(byteBuffer)
-        val prediction = outputBuffer.floatArray[0].toInt() // Assuming the output is a single float representing a binary class
+        val prediction =
+            outputBuffer.floatArray[0].toInt() // Assuming the output is a single float representing a binary class
 
         updatePredictionUI(prediction)
     }
@@ -105,14 +132,23 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         } else {
             binding.predictionValue.text = "No Pneumonia Detected"
             binding.predictionValue.setBackgroundResource(R.drawable.green_result_background)
-            binding.predictionValue.setTextColor(ContextCompat.getColor(this, R.color.addButtonColor))
+            binding.predictionValue.setTextColor(
+                ContextCompat.getColor(
+                    this,
+                    R.color.addButtonColor
+                )
+            )
         }
         binding.shareResult.visibility = VISIBLE
         Log.d("Predictions", "Predictions: $prediction")
     }
 
     private fun onShareResultClick() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             val filePath = createPdf(
                 binding.mq6Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f,
                 binding.mq9Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f,
@@ -127,19 +163,25 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     }
 
     private fun registerActivityResults() {
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                onShareResultClick() // Retry sharing the result
-            } else {
-                showRationaleDialog()
+        permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                if (granted) {
+                    onShareResultClick() // Retry sharing the result
+                } else {
+                    showRationaleDialog()
+                }
             }
-        }
 
-        settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                // Permission granted, no action needed
+        settingsLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                if (ContextCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Permission granted, no action needed
+                }
             }
-        }
     }
 
     private fun showRationaleDialog() {
@@ -147,9 +189,10 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             this, true, "Allow write permission to share the result",
             Manifest.permission.WRITE_EXTERNAL_STORAGE, object : PermissionListener {
                 override fun onSettingClicked() {
-                    val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", packageName, null)
-                    }
+                    val settingsIntent =
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                        }
                     settingsLauncher.launch(settingsIntent)
                 }
             }
@@ -160,27 +203,26 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     private fun readDataFromFirebase() {
         Log.d("Firebase", "Reading data from Firebase")
         databaseReference.addValueEventListener(object : ValueEventListener {
+
+            @SuppressLint("SetTextI18n")
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d("Firebase", "Snapshot: ${snapshot.value}")
-                if (snapshot.exists()) {
-                    val data = snapshot.value as? Map<*, *>
-                    if (data != null) {
-                        val mq135Value = data["MQ135"]?.toString()?.toFloatOrNull() ?: 0f
-                        val mq6Value = data["MQ6"]?.toString()?.toFloatOrNull() ?: 0f
-                        val mq9Value = data["MQ9"]?.toString()?.toFloatOrNull() ?: 0f
-                        val tgs2602Value = data["TGS2602"]?.toString()?.toFloatOrNull() ?: 0f
+                val data = snapshot.value as? Map<*, *>
+                Log.d("Firebase", "Snapshot: ${data.toString()}")
+                if (data != null) {
+                    val mq135Value = data["MQ135"]?.toString()?.toFloatOrNull() ?: 0f
+                    val mq6Value = data["MQ6"]?.toString()?.toFloatOrNull() ?: 0f
+                    val mq9Value = data["MQ9"]?.toString()?.toFloatOrNull() ?: 0f
+                    val tgs2602Value = data["TGS2602"]?.toString()?.toFloatOrNull() ?: 0f
 
-                        Handler(Looper.getMainLooper()).post {
-                            binding.mq135Value.text = "${mq135Value}ppm"
-                            binding.mq6Value.text = "${mq6Value}ppm"
-                            binding.mq9Value.text = "${mq9Value}ppm"
-                            binding.tgs2602Value.text = "${tgs2602Value}ppm"
-                        }
+                    binding.mq135Value.text = "${mq135Value}ppm"
+                    binding.mq6Value.text = "${mq6Value}ppm"
+                    binding.mq9Value.text = "${mq9Value}ppm"
+                    binding.tgs2602Value.text = "${tgs2602Value}ppm"
 
-                        Log.d("Firebase", "MQ135: $mq135Value, MQ6: $mq6Value, MQ9: $mq9Value, TGS2602: $tgs2602Value")
-                    } else {
-                        Log.d("Firebase", "Data map is null or not of expected type")
-                    }
+                    Log.d(
+                        "Firebase",
+                        "MQ135: $mq135Value, MQ6: $mq6Value, MQ9: $mq9Value, TGS2602: $tgs2602Value"
+                    )
                 } else {
                     Log.d("Firebase", "No data available")
                 }
@@ -194,7 +236,13 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     }
 
 
-    private fun createPdf(mq6: Float, mq9: Float, mq135: Float, tgs2602: Float, predictionResult: Int): String {
+    private fun createPdf(
+        mq6: Float,
+        mq9: Float,
+        mq135: Float,
+        tgs2602: Float,
+        predictionResult: Int
+    ): String {
         val pdfDocument = PdfDocument()
         val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create()
         val page = pdfDocument.startPage(pageInfo)
@@ -205,7 +253,8 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         val appIconBitmap = BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_round)
             ?: BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher_foreground)
         val iconWidth = 100
-        val iconHeight = (appIconBitmap.height.toFloat() / appIconBitmap.width.toFloat() * iconWidth).toInt()
+        val iconHeight =
+            (appIconBitmap.height.toFloat() / appIconBitmap.width.toFloat() * iconWidth).toInt()
         val iconBitmap = Bitmap.createScaledBitmap(appIconBitmap, iconWidth, iconHeight, false)
 
         val iconX = (pageInfo.pageWidth - iconWidth) / 2f
@@ -245,14 +294,18 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         yPosition += 40f
 
         // Prediction Result
-        val resultText = if (predictionResult == 1) "Pneumonia Detected" else "No Pneumonia Detected"
+        val resultText =
+            if (predictionResult == 1) "Pneumonia Detected" else "No Pneumonia Detected"
         paint.apply {
             textSize = 20f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
-            color = if (predictionResult == 1) ContextCompat.getColor(this@DeviceSensorDetailsActivity, R.color.red) else ContextCompat.getColor(this@DeviceSensorDetailsActivity, R.color.addButtonColor)
+            color = if (predictionResult == 1) ContextCompat.getColor(
+                this@DeviceSensorDetailsActivity,
+                R.color.red
+            ) else ContextCompat.getColor(this@DeviceSensorDetailsActivity, R.color.addButtonColor)
         }
-        canvas.drawText(resultText, pageInfo.pageWidth / 2f , yPosition, paint)
+        canvas.drawText(resultText, pageInfo.pageWidth / 2f, yPosition, paint)
         yPosition += 30f
 
         pdfDocument.finishPage(page)
@@ -288,6 +341,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(networkChangeReceiver)
         pneumoniaPredictor.close()
     }
 }

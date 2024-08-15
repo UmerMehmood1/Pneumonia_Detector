@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Heading1Theme"
     android:background="@color/white">
     <!--Top Menu Bar-->
     <RelativeLayout
@@ -14,35 +13,61 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="8dp">
 
-        <ImageButton
-            android:id="@+id/back_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:background="@drawable/ripple_item_background"
-            android:backgroundTint="@color/white"
-            android:padding="8dp"
-            android:src="@drawable/round_keyboard_backspace_24"
-            android:visibility="visible" />
+<!--        <ImageButton-->
+<!--            android:id="@+id/back_button"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignParentTop="true"-->
+<!--            android:layout_alignParentEnd="true"-->
+<!--            android:background="@drawable/ripple_item_background"-->
+<!--            android:backgroundTint="@color/white"-->
+<!--            android:padding="8dp"-->
+<!--            android:src="@drawable/round_keyboard_backspace_24"-->
+<!--            android:visibility="visible" />-->
 
+<!--            android:layout_below="@+id/back_button"-->
         <com.google.android.material.textview.MaterialTextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/back_button"
             android:text="Sensors Data"
             android:theme="@style/Heading1Theme" />
     </RelativeLayout>
 
+    <LinearLayout
+        android:animateLayoutChanges="true"
+        android:id="@+id/internetStateLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_menu"
+        android:gravity="center"
+        android:orientation="horizontal"
+        >
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/internetState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/red"
+            android:padding="4dp"
+            android:theme="@style/RegularTextTheme"
+            android:textColor="@color/black"
+            android:text="Please connect internet to get live data"
+            android:textAlignment="center"
+            android:visibility="gone"
+            />
+    </LinearLayout>
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/screenContentLayout"
-        android:layout_above="@+id/predictButton"
-        android:layout_below="@id/top_menu"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/buttonLayout"
+        android:layout_below="@id/internetStateLayout">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
@@ -52,20 +77,22 @@
                 android:layout_marginVertical="16dp"
                 android:text="Live Data"
                 android:theme="@style/Heading2Theme" />
+
             <LinearLayout
                 android:id="@+id/sensorDataLayout"
-                android:layout_below="@id/title"
                 android:layout_width="match_parent"
-                android:orientation="vertical"
-                android:layout_height="300dp">
+                android:layout_height="300dp"
+                android:layout_below="@id/title"
+                android:orientation="vertical">
+
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="16dp"
-                    android:paddingHorizontal="13.5dp"
+                    android:background="@drawable/ripple_item_background"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="@drawable/ripple_item_background">
+                    android:paddingHorizontal="13.5dp"
+                    android:paddingVertical="16dp">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -75,12 +102,12 @@
                             android:id="@+id/mq6Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
                             android:layout_alignParentTop="true"
+                            android:layout_marginStart="8dp"
                             android:text="Methane"
                             android:textSize="16sp"
-                            android:theme="@style/Heading3Theme"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:theme="@style/Heading3Theme" />
 
                         <!-- Sensor Details (Temperature and Humidity) -->
                         <com.google.android.material.textview.MaterialTextView
@@ -90,29 +117,30 @@
                             android:layout_below="@id/mq6Name"
                             android:layout_marginStart="8dp"
                             android:text="12:46 PM"
-                            android:theme="@style/RegularTextTheme"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:theme="@style/RegularTextTheme" />
 
                     </RelativeLayout>
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/mq6Value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0.000ppm"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:theme="@style/RegularTextTheme"
-                        android:textColor="@color/black"/>
+                        android:text="0.000ppm"
+                        android:textColor="@color/black"
+                        android:theme="@style/RegularTextTheme" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="16dp"
-                    android:paddingHorizontal="13.5dp"
+                    android:background="@drawable/ripple_item_background"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="@drawable/ripple_item_background">
+                    android:paddingHorizontal="13.5dp"
+                    android:paddingVertical="16dp">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -122,12 +150,12 @@
                             android:id="@+id/mq9Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
                             android:layout_alignParentTop="true"
+                            android:layout_marginStart="8dp"
                             android:text="Carbon Monoxide"
                             android:textSize="16sp"
-                            android:theme="@style/Heading3Theme"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:theme="@style/Heading3Theme" />
 
                         <!-- Sensor Details (Temperature and Humidity) -->
                         <com.google.android.material.textview.MaterialTextView
@@ -137,29 +165,30 @@
                             android:layout_below="@id/mq9Name"
                             android:layout_marginStart="8dp"
                             android:text="12:46 PM"
-                            android:theme="@style/RegularTextTheme"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:theme="@style/RegularTextTheme" />
 
                     </RelativeLayout>
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/mq9Value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0.000ppm"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:theme="@style/RegularTextTheme"
-                        android:textColor="@color/black"/>
+                        android:text="0.000ppm"
+                        android:textColor="@color/black"
+                        android:theme="@style/RegularTextTheme" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="16dp"
-                    android:paddingHorizontal="13.5dp"
+                    android:background="@drawable/ripple_item_background"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="@drawable/ripple_item_background">
+                    android:paddingHorizontal="13.5dp"
+                    android:paddingVertical="16dp">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -169,12 +198,12 @@
                             android:id="@+id/mq135Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
                             android:layout_alignParentTop="true"
+                            android:layout_marginStart="8dp"
                             android:text="Ammonia"
                             android:textSize="16sp"
-                            android:theme="@style/Heading3Theme"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:theme="@style/Heading3Theme" />
 
                         <!-- Sensor Details (Temperature and Humidity) -->
                         <com.google.android.material.textview.MaterialTextView
@@ -184,29 +213,30 @@
                             android:layout_below="@id/mq135Name"
                             android:layout_marginStart="8dp"
                             android:text="12:46 PM"
-                            android:theme="@style/RegularTextTheme"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:theme="@style/RegularTextTheme" />
 
                     </RelativeLayout>
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/mq135Value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0.000ppm"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:theme="@style/RegularTextTheme"
-                        android:textColor="@color/black"/>
+                        android:text="0.000ppm"
+                        android:textColor="@color/black"
+                        android:theme="@style/RegularTextTheme" />
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingVertical="16dp"
-                    android:paddingHorizontal="13.5dp"
+                    android:background="@drawable/ripple_item_background"
                     android:clickable="true"
                     android:focusable="true"
-                    android:background="@drawable/ripple_item_background">
+                    android:paddingHorizontal="13.5dp"
+                    android:paddingVertical="16dp">
 
                     <RelativeLayout
                         android:layout_width="wrap_content"
@@ -216,12 +246,12 @@
                             android:id="@+id/tgs2602Name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
                             android:layout_alignParentTop="true"
+                            android:layout_marginStart="8dp"
                             android:text="Volatile Organic Compound"
                             android:textSize="16sp"
-                            android:theme="@style/Heading3Theme"
-                            android:textStyle="bold" />
+                            android:textStyle="bold"
+                            android:theme="@style/Heading3Theme" />
 
                         <!-- Sensor Details (Temperature and Humidity) -->
                         <com.google.android.material.textview.MaterialTextView
@@ -231,81 +261,86 @@
                             android:layout_below="@id/tgs2602Name"
                             android:layout_marginStart="8dp"
                             android:text="12:46 PM"
-                            android:theme="@style/RegularTextTheme"
-                            android:textSize="14sp" />
+                            android:textSize="14sp"
+                            android:theme="@style/RegularTextTheme" />
 
                     </RelativeLayout>
+
                     <com.google.android.material.textview.MaterialTextView
                         android:id="@+id/tgs2602Value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0.000ppm"
                         android:layout_alignParentEnd="true"
                         android:layout_centerVertical="true"
-                        android:theme="@style/RegularTextTheme"
-                        android:textColor="@color/black"/>
+                        android:text="0.000ppm"
+                        android:textColor="@color/black"
+                        android:theme="@style/RegularTextTheme" />
                 </RelativeLayout>
 
             </LinearLayout>
+
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/prediction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:theme="@style/Heading1Theme"
-                android:text="Prediction"
                 android:layout_below="@id/sensorDataLayout"
                 android:layout_alignParentStart="true"
                 android:layout_marginHorizontal="16dp"
-                />
+                android:text="Prediction"
+                android:theme="@style/Heading1Theme" />
+
             <com.google.android.material.textview.MaterialTextView
-                android:background="@drawable/default_prediction_result_background"
-                android:textAlignment="center"
                 android:id="@+id/predictionValue"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/prediction"
-                android:padding="16dp"
+                android:layout_centerHorizontal="true"
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_centerHorizontal="true"
+                android:background="@drawable/default_prediction_result_background"
+                android:padding="16dp"
                 android:text="Test result will be shown here"
+                android:textAlignment="center"
                 android:textColor="@color/RegularTextColor"
                 android:theme="@style/Heading2Theme" />
 
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
+
     <LinearLayout
-        android:animateLayoutChanges="true"
+        android:id="@+id/buttonLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal"
+        android:animateLayoutChanges="true"
         android:gravity="center"
+        android:orientation="horizontal"
         android:weightSum="1">
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/predictButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="16dp"
             android:layout_marginHorizontal="16dp"
-            android:layout_weight="1"
+            android:layout_marginVertical="16dp"
             android:layout_marginBottom="10dp"
-            android:textColor="@color/black"
+            android:layout_weight="1"
             android:backgroundTint="@color/addButtonColor"
             android:text="Predict"
+            android:textColor="@color/black"
             android:theme="@style/RegularTextTheme"
             app:cornerRadius="10dp"
             app:rippleColor="@color/button_color" />
+
         <ImageButton
-            android:visibility="gone"
             android:id="@+id/shareResult"
-            android:background="@drawable/ripple_item_background"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="16dp"
-            android:src="@drawable/rounded_share_windows_24"
+            android:background="@drawable/ripple_item_background"
             android:padding="16dp"
-            />
+            android:src="@drawable/rounded_share_windows_24"
+            android:visibility="gone" />
     </LinearLayout>
 
 </RelativeLayout>
