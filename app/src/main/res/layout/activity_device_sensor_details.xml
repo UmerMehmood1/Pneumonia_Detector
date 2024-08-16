@@ -331,7 +331,16 @@
             android:theme="@style/RegularTextTheme"
             app:cornerRadius="10dp"
             app:rippleColor="@color/button_color" />
-
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:id="@+id/progressBar"
+            android:layout_height="wrap_content"
+            android:progressTint="@color/addButtonColor"
+            android:indeterminateTint="@color/addButtonColor"
+            android:layout_marginHorizontal="16dp"
+            android:padding="16dp"
+            android:indeterminate="true"
+            android:visibility="gone"/>
         <ImageButton
             android:id="@+id/shareResult"
             android:layout_width="wrap_content"

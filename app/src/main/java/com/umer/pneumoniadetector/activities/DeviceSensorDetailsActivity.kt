@@ -5,8 +5,10 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
@@ -25,12 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import com.google.android.material.snackbar.Snackbar
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 import com.umer.pneumoniadetector.R
 import com.umer.pneumoniadetector.bottomSheets.PermissionBottomSheet
 import com.umer.pneumoniadetector.bottomSheets.PermissionListener
@@ -38,9 +35,14 @@ import com.umer.pneumoniadetector.databinding.ActivityDeviceSensorDetailsBinding
 import com.umer.pneumoniadetector.listeners.OnInternetStateChanged
 import com.umer.pneumoniadetector.recievers.NetworkChangeReceiver
 import com.umer.pneumoniadetector.utils.PneumoniaPredictor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
+
 
 class DeviceSensorDetailsActivity : AppCompatActivity() {
 
@@ -50,38 +52,21 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
     private lateinit var settingsLauncher: ActivityResultLauncher<Intent>
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
+    private val predictions = mutableListOf<Int>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDeviceSensorDetailsBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupInsets()
+        binding.progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED))
+
         initializeFirebase()
         pneumoniaPredictor = PneumoniaPredictor(this)
-        networkChangeReceiver = NetworkChangeReceiver(object : OnInternetStateChanged{
-            @SuppressLint("SetTextI18n")
-            override fun onConnected() {
-                binding.internetState.animate().alpha(0f).setDuration(300).start()
-                binding.internetState.text = "Internet Connected"
-                binding.internetState.setBackgroundColor(getColor(R.color.addButtonColor))
-                readDataFromFirebase()
-                binding.internetState.visibility = GONE
-            }
-
-            @SuppressLint("SetTextI18n")
-            override fun onDisconnected() {
-                binding.internetState.visibility = VISIBLE
-                binding.internetState.animate().alpha(1f).setDuration(300).start()
-                binding.internetState.text = "Please connect internet to get live data"
-                binding.internetState.setBackgroundColor(getColor(R.color.red))
-            }
-        })
-        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
-        registerReceiver(networkChangeReceiver, filter)
+        setupNetworkChangeReceiver()
         setupListeners()
         registerActivityResults()
     }
-
 
     private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -93,55 +78,106 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
     private fun initializeFirebase() {
         databaseReference = FirebaseDatabase.getInstance().reference
-        Log.d("Firebase", "Firebase initialized $databaseReference")
+        Log.d("Firebase", "Firebase initialized: $databaseReference")
         readDataFromFirebase()
     }
 
     @SuppressLint("SetTextI18n")
+    private fun setupNetworkChangeReceiver() {
+        networkChangeReceiver = NetworkChangeReceiver(object : OnInternetStateChanged {
+            override fun onConnected() {
+                binding.internetState.animate().alpha(0f).setDuration(300).start()
+                binding.internetState.text = "Internet Connected"
+                binding.internetState.setBackgroundColor(getColor(R.color.addButtonColor))
+                readDataFromFirebase()
+                binding.internetState.visibility = GONE
+            }
+
+            override fun onDisconnected() {
+                binding.internetState.visibility = VISIBLE
+                binding.internetState.animate().alpha(1f).setDuration(300).start()
+                binding.internetState.text = "Connect internet to get live data"
+                binding.internetState.setBackgroundColor(getColor(R.color.red))
+            }
+        })
+        val filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        registerReceiver(networkChangeReceiver, filter)
+    }
+
     private fun setupListeners() {
-//        binding.backButton.setOnClickListener { finish() }
         binding.predictButton.setOnClickListener { onPredictButtonClick() }
         binding.shareResult.setOnClickListener { onShareResultClick() }
     }
 
     private fun onPredictButtonClick() {
-        val mq6Value = binding.mq6Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-        val mq9Value = binding.mq9Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-        val mq135Value = binding.mq135Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-        val tgs2602Value =
-            binding.tgs2602Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+        // Disable the prediction button and show the progress bar
+        binding.predictButton.isEnabled = false
+        binding.progressBar.visibility = VISIBLE
 
-        // Convert sensor values to ByteBuffer
-        val byteBuffer = ByteBuffer.allocate(4 * 4).apply {
-            asFloatBuffer().put(floatArrayOf(mq6Value, mq9Value, mq135Value, tgs2602Value))
+        // Clear previous predictions
+        predictions.clear()
+
+        // Start a coroutine to collect predictions
+        CoroutineScope(Dispatchers.Main).launch {
+            repeat(10) {
+                delay(1000) // 1-second delay between each prediction
+
+                // Fetch sensor values
+                val mq6Value = binding.mq6Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val mq9Value = binding.mq9Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val mq135Value = binding.mq135Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val tgs2602Value = binding.tgs2602Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+
+                // Prepare input for prediction
+                val byteBuffer = ByteBuffer.allocate(4 * 4).apply {
+                    asFloatBuffer().put(floatArrayOf(mq6Value, mq9Value, mq135Value, tgs2602Value))
+                }
+
+                // Get prediction from the predictor
+                val outputBuffer = pneumoniaPredictor.predict(byteBuffer)
+                val prediction = outputBuffer.floatArray[0].toInt()
+
+                // Add prediction to the list
+                predictions.add(prediction)
+            }
+
+            // Once all predictions are collected, update the UI
+            updatePredictionUIBasedOnMajority(predictions)
+
+            // Enable the prediction button and hide the progress bar
+            binding.predictButton.isEnabled = true
+            binding.progressBar.visibility = GONE
+
+            // Show the share result button
+            binding.shareResult.visibility = VISIBLE
         }
+    }
 
-        // Make prediction
-        val outputBuffer = pneumoniaPredictor.predict(byteBuffer)
-        val prediction =
-            outputBuffer.floatArray[0].toInt() // Assuming the output is a single float representing a binary class
+    private fun updatePredictionUIBasedOnMajority(predictions: List<Int>) {
+        val countOnes = predictions.count { it == 1 }
+        val countZeros = predictions.count { it == 0 }
 
-        updatePredictionUI(prediction)
+        val predictionToShow = if (countOnes > countZeros) 1 else 0
+
+        updatePredictionUI(predictionToShow)
     }
 
     @SuppressLint("SetTextI18n")
     private fun updatePredictionUI(prediction: Int) {
-        if (prediction == 1) {
-            binding.predictionValue.text = "Pneumonia Detected"
-            binding.predictionValue.setBackgroundResource(R.drawable.red_result_background)
-            binding.predictionValue.setTextColor(ContextCompat.getColor(this, R.color.red))
-        } else {
-            binding.predictionValue.text = "No Pneumonia Detected"
-            binding.predictionValue.setBackgroundResource(R.drawable.green_result_background)
-            binding.predictionValue.setTextColor(
-                ContextCompat.getColor(
-                    this,
-                    R.color.addButtonColor
-                )
-            )
+        when (prediction) {
+            1 -> {
+                binding.predictionValue.text = "Pneumonia Detected"
+                binding.predictionValue.setBackgroundResource(R.drawable.red_result_background)
+                binding.predictionValue.setTextColor(ContextCompat.getColor(this, R.color.red))
+            }
+            else -> {
+                binding.predictionValue.text = "No Pneumonia Detected"
+                binding.predictionValue.setBackgroundResource(R.drawable.green_result_background)
+                binding.predictionValue.setTextColor(ContextCompat.getColor(this, R.color.addButtonColor))
+            }
         }
         binding.shareResult.visibility = VISIBLE
-        Log.d("Predictions", "Predictions: $prediction")
+        Log.d("Predictions", "Majority Prediction: $prediction")
     }
 
     private fun onShareResultClick() {
@@ -164,28 +200,25 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     }
 
     private fun registerActivityResults() {
-        permissionLauncher =
-            registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-                if (granted) {
-                    onShareResultClick() // Retry sharing the result
-                } else {
-                    showRationaleDialog()
-                }
+        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                onShareResultClick()
+            } else {
+                showRationaleDialog()
             }
+        }
 
-        settingsLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
+        settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     }
 
     private fun showRationaleDialog() {
         val bottomSheet = PermissionBottomSheet(
-            this, true, "Allow write permission to share the result",
+            this, true, "Storage Permission Required",
             Manifest.permission.WRITE_EXTERNAL_STORAGE, object : PermissionListener {
                 override fun onSettingClicked() {
-                    val settingsIntent =
-                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.fromParts("package", packageName, null)
-                        }
+                    val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", packageName, null)
+                    }
                     settingsLauncher.launch(settingsIntent)
                 }
             }
@@ -202,32 +235,31 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
                 val data = snapshot.value as? Map<*, *>
                 Log.d("Firebase", "Snapshot: ${data.toString()}")
                 if (data != null) {
-                    val mq135Value = data["MQ135"]?.toString()?.toFloatOrNull() ?: 0f
-                    val mq6Value = data["MQ6"]?.toString()?.toFloatOrNull() ?: 0f
-                    val mq9Value = data["MQ9"]?.toString()?.toFloatOrNull() ?: 0f
-                    val tgs2602Value = data["TGS2602"]?.toString()?.toFloatOrNull() ?: 0f
+                    val mq6 = data["mq6"]?.toString() ?: "0.0 ppm"
+                    val mq9 = data["mq9"]?.toString() ?: "0.0 ppm"
+                    val mq135 = data["mq135"]?.toString() ?: "0.0 ppm"
+                    val tgs2602 = data["tgs2602"]?.toString() ?: "0.0 ppm"
+                    val lastUpdated = data["lastUpdated"]?.toString() ?: "N/A"
 
-                    binding.mq135Value.text = "${mq135Value}ppm"
-                    binding.mq6Value.text = "${mq6Value}ppm"
-                    binding.mq9Value.text = "${mq9Value}ppm"
-                    binding.tgs2602Value.text = "${tgs2602Value}ppm"
+                    binding.mq6Value.text = mq6
+                    binding.mq9Value.text = mq9
+                    binding.mq135Value.text = mq135
+                    binding.tgs2602Value.text = tgs2602
 
-                    Log.d(
-                        "Firebase",
-                        "MQ135: $mq135Value, MQ6: $mq6Value, MQ9: $mq9Value, TGS2602: $tgs2602Value"
-                    )
+                    binding.mq6lastUpdated.text = lastUpdated
+                    binding.mq9lastUpdated.text = lastUpdated
+                    binding.mq135lastUpdated.text = lastUpdated
+                    binding.tgs2602lastUpdated.text = lastUpdated
                 } else {
-                    Log.d("Firebase", "No data available")
+                    Log.d("Firebase", "No data found")
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.d("Firebase", "Error reading data from Firebase", error.toException())
-                Snackbar.make(binding.root, "Error: ${error.message}", Snackbar.LENGTH_SHORT).show()
+                Log.e("Firebase", "Error reading data: ${error.message}")
             }
         })
     }
-
 
     private fun createPdf(
         mq6: Float,
@@ -315,26 +347,33 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             pdfDocument.close()
         }
     }
-
     private fun sharePdf(filePath: String) {
-        if (filePath.isNotEmpty()) {
-            val file = File(filePath)
-            val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_STREAM, uri)
-                type = "application/pdf"
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            }
-            startActivity(Intent.createChooser(shareIntent, "Share PDF via"))
-        } else {
-            Log.e("SharePDF", "Invalid file path.")
+        val file = File(filePath)
+        val uri = FileProvider.getUriForFile(this, "${packageName}.provider", file)
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+        val chooser = Intent.createChooser(shareIntent, "Share PDF")
+        val resInfoList =
+            this.packageManager.queryIntentActivities(chooser, PackageManager.MATCH_DEFAULT_ONLY)
+
+        for (resolveInfo in resInfoList) {
+            val packageName = resolveInfo.activityInfo.packageName
+            this.grantUriPermission(
+                packageName,
+                uri,
+                Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+
+        startActivity(chooser)
     }
+
 
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(networkChangeReceiver)
-        pneumoniaPredictor.close()
     }
 }
