@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.ByteBuffer
+import java.text.SimpleDateFormat
 
 
 class DeviceSensorDetailsActivity : AppCompatActivity() {
@@ -239,7 +240,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
                     val mq9 = data["mq9"]?.toString() ?: "0.0 ppm"
                     val mq135 = data["mq135"]?.toString() ?: "0.0 ppm"
                     val tgs2602 = data["tgs2602"]?.toString() ?: "0.0 ppm"
-                    val lastUpdated = data["lastUpdated"]?.toString() ?: "N/A"
+                    val lastUpdated = "Last Updated: " +SimpleDateFormat("hh:mm a").format(System.currentTimeMillis())
 
                     binding.mq6Value.text = mq6
                     binding.mq9Value.text = mq9
