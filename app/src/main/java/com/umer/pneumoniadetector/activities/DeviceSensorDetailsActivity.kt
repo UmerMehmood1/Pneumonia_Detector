@@ -154,7 +154,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         lineChart.setPinchZoom(true)
         lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         lineChart.axisRight.isEnabled = false
-
+        lineChart.setNoDataTextColor(R.color.addButtonColor)
         // Optionally, customize the chart's appearance
         lineChart.xAxis.granularity = 1f
         lineChart.axisLeft.granularity = 1f
@@ -205,6 +205,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
     private fun onPredictButtonClick() {
         // Disable the prediction button and show the progress bar
+        binding.shareResult.visibility = GONE
         binding.predictButton.isEnabled = false
         binding.progressBar.visibility = VISIBLE
 
