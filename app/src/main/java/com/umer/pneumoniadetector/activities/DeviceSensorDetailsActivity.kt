@@ -85,6 +85,15 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
     private fun updatePredictionUIBasedOnMajority(predictions: List<PredictionModel>) {
         updateChart(predictions)
+        // Find the majority prediction
+        val zeroCount = predictions.count { it.prediction == 0 }
+        val oneCount = predictions.count { it.prediction == 1 }
+        if (zeroCount > oneCount) {
+            updatePredictionUI(0)
+        }
+        else if (oneCount > zeroCount) {
+            updatePredictionUI(1)
+        }
     }
 
     private fun updateChart(predictions: List<PredictionModel>) {
