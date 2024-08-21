@@ -48,7 +48,7 @@ dependencies {
     implementation ("org.tensorflow:tensorflow-lite-gpu:2.10.0")
     implementation ("org.tensorflow:tensorflow-lite-support:0.4.3")
     implementation ("org.tensorflow:tensorflow-lite-metadata:0.4.3")
-
+    implementation (libs.mpandroidchart)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

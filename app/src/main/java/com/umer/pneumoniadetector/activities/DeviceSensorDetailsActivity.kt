@@ -27,12 +27,25 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.charts.HorizontalBarChart
+import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.XAxis
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.Entry
+import com.github.mikephil.charting.data.LineData
+import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.database.*
 import com.umer.pneumoniadetector.R
 import com.umer.pneumoniadetector.bottomSheets.PermissionBottomSheet
 import com.umer.pneumoniadetector.bottomSheets.PermissionListener
 import com.umer.pneumoniadetector.databinding.ActivityDeviceSensorDetailsBinding
 import com.umer.pneumoniadetector.listeners.OnInternetStateChanged
+import com.umer.pneumoniadetector.models.PredictionModel
 import com.umer.pneumoniadetector.recievers.NetworkChangeReceiver
 import com.umer.pneumoniadetector.utils.PneumoniaPredictor
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +66,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     private lateinit var permissionLauncher: ActivityResultLauncher<String>
     private lateinit var settingsLauncher: ActivityResultLauncher<Intent>
     private lateinit var networkChangeReceiver: NetworkChangeReceiver
-    private val predictions = mutableListOf<Int>()
+    private val predictions = mutableListOf<PredictionModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +80,78 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         setupNetworkChangeReceiver()
         setupListeners()
         registerActivityResults()
+        setupChart()
     }
+
+    private fun updatePredictionUIBasedOnMajority(predictions: List<PredictionModel>) {
+        updateChart(predictions)
+    }
+
+    private fun updateChart(predictions: List<PredictionModel>) {
+        val entriesMQ6 = mutableListOf<Entry>()
+        val entriesMQ9 = mutableListOf<Entry>()
+        val entriesMQ135 = mutableListOf<Entry>()
+        val entriesTGS2602 = mutableListOf<Entry>()
+
+        for (i in predictions.indices) {
+            val prediction = predictions[i]
+            entriesMQ6.add(Entry(i.toFloat(), prediction.mq6))
+            entriesMQ9.add(Entry(i.toFloat(), prediction.mq9))
+            entriesMQ135.add(Entry(i.toFloat(), prediction.mq135))
+            entriesTGS2602.add(Entry(i.toFloat(), prediction.tgs2602))
+        }
+
+        val dataSetMQ6 = LineDataSet(entriesMQ6, "MQ6 (ppm)").apply {
+            color = ColorTemplate.COLORFUL_COLORS[0]
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 3f
+            setDrawValues(false)
+        }
+        val dataSetMQ9 = LineDataSet(entriesMQ9, "MQ9 (ppm)").apply {
+            color = ColorTemplate.COLORFUL_COLORS[1]
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 3f
+            setDrawValues(false)
+        }
+        val dataSetMQ135 = LineDataSet(entriesMQ135, "MQ135 (ppm)").apply {
+            color = ColorTemplate.COLORFUL_COLORS[2]
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 3f
+            setDrawValues(false)
+        }
+        val dataSetTGS2602 = LineDataSet(entriesTGS2602, "TGS2602 (ppm)").apply {
+            color = ColorTemplate.COLORFUL_COLORS[3]
+            lineWidth = 2f
+            setDrawCircles(true)
+            circleRadius = 3f
+            setDrawValues(false)
+        }
+
+        val lineData = LineData(dataSetMQ6, dataSetMQ9, dataSetMQ135, dataSetTGS2602)
+        binding.predictionChart.data = lineData
+        binding.predictionChart.invalidate() // Refresh chart
+    }
+
+
+    private fun setupChart() {
+        val lineChart: LineChart = binding.predictionChart
+
+        // Setting up chart attributes
+        lineChart.description.isEnabled = false
+        lineChart.setTouchEnabled(true)
+        lineChart.setPinchZoom(true)
+        lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+        lineChart.axisRight.isEnabled = false
+
+        // Optionally, customize the chart's appearance
+        lineChart.xAxis.granularity = 1f
+        lineChart.axisLeft.granularity = 1f
+        lineChart.animateX(1000)
+    }
+
 
     private fun setupInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -120,14 +204,17 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
 
         // Start a coroutine to collect predictions
         CoroutineScope(Dispatchers.Main).launch {
-            repeat(10) {
-                delay(1000) // 1-second delay between each prediction
-
+            repeat(11) {
+                delay(1500) // 1-second delay between each prediction
                 // Fetch sensor values
-                val mq6Value = binding.mq6Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-                val mq9Value = binding.mq9Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-                val mq135Value = binding.mq135Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
-                val tgs2602Value = binding.tgs2602Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val mq6Value =
+                    binding.mq6Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val mq9Value =
+                    binding.mq9Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val mq135Value =
+                    binding.mq135Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
+                val tgs2602Value =
+                    binding.tgs2602Value.text.toString().replace("ppm", "").toFloatOrNull() ?: 0f
 
                 // Prepare input for prediction
                 val byteBuffer = ByteBuffer.allocate(4 * 4).apply {
@@ -139,7 +226,15 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
                 val prediction = outputBuffer.floatArray[0].toInt()
 
                 // Add prediction to the list
-                predictions.add(prediction)
+                predictions.add(
+                    PredictionModel(
+                        mq6Value,
+                        mq9Value,
+                        mq135Value,
+                        tgs2602Value,
+                        prediction
+                    )
+                )
             }
 
             // Once all predictions are collected, update the UI
@@ -154,15 +249,6 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePredictionUIBasedOnMajority(predictions: List<Int>) {
-        val countOnes = predictions.count { it == 1 }
-        val countZeros = predictions.count { it == 0 }
-
-        val predictionToShow = if (countOnes > countZeros) 1 else 0
-
-        updatePredictionUI(predictionToShow)
-    }
-
     @SuppressLint("SetTextI18n")
     private fun updatePredictionUI(prediction: Int) {
         when (prediction) {
@@ -171,10 +257,16 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
                 binding.predictionValue.setBackgroundResource(R.drawable.red_result_background)
                 binding.predictionValue.setTextColor(ContextCompat.getColor(this, R.color.red))
             }
+
             else -> {
                 binding.predictionValue.text = "No Pneumonia Detected"
                 binding.predictionValue.setBackgroundResource(R.drawable.green_result_background)
-                binding.predictionValue.setTextColor(ContextCompat.getColor(this, R.color.addButtonColor))
+                binding.predictionValue.setTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.addButtonColor
+                    )
+                )
             }
         }
         binding.shareResult.visibility = VISIBLE
@@ -201,15 +293,17 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
     }
 
     private fun registerActivityResults() {
-        permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) {
-                onShareResultClick()
-            } else {
-                showRationaleDialog()
+        permissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+                if (granted) {
+                    onShareResultClick()
+                } else {
+                    showRationaleDialog()
+                }
             }
-        }
 
-        settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
+        settingsLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}
     }
 
     private fun showRationaleDialog() {
@@ -217,9 +311,10 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             this, true, "Storage Permission Required",
             Manifest.permission.WRITE_EXTERNAL_STORAGE, object : PermissionListener {
                 override fun onSettingClicked() {
-                    val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.fromParts("package", packageName, null)
-                    }
+                    val settingsIntent =
+                        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.fromParts("package", packageName, null)
+                        }
                     settingsLauncher.launch(settingsIntent)
                 }
             }
@@ -236,16 +331,17 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
                 val data = snapshot.value as? Map<*, *>
                 Log.d("Firebase", "Snapshot: ${data.toString()}")
                 if (data != null) {
-                    val mq6 = data["mq6"]?.toString() ?: "0.0 ppm"
-                    val mq9 = data["mq9"]?.toString() ?: "0.0 ppm"
-                    val mq135 = data["mq135"]?.toString() ?: "0.0 ppm"
-                    val tgs2602 = data["tgs2602"]?.toString() ?: "0.0 ppm"
-                    val lastUpdated = "Last Updated: " +SimpleDateFormat("hh:mm a").format(System.currentTimeMillis())
+                    val mq6 = data["MQ6"]?.toString() ?: "0.0"
+                    val mq9 = data["MQ9"]?.toString() ?: "0.0"
+                    val mq135 = data["MQ135"]?.toString() ?: "0.0"
+                    val tgs2602 = data["TGS2602"]?.toString() ?: "0.0"
+                    val lastUpdated =
+                        "Last Updated: " + SimpleDateFormat("hh:mm a").format(System.currentTimeMillis())
 
-                    binding.mq6Value.text = mq6
-                    binding.mq9Value.text = mq9
-                    binding.mq135Value.text = mq135
-                    binding.tgs2602Value.text = tgs2602
+                    binding.mq6Value.text = "$mq6 ppm"
+                    binding.mq9Value.text = "$mq9 ppm"
+                    binding.mq135Value.text = "$mq135 ppm"
+                    binding.tgs2602Value.text = "$tgs2602 ppm"
 
                     binding.mq6lastUpdated.text = lastUpdated
                     binding.mq9lastUpdated.text = lastUpdated
@@ -348,6 +444,7 @@ class DeviceSensorDetailsActivity : AppCompatActivity() {
             pdfDocument.close()
         }
     }
+
     private fun sharePdf(filePath: String) {
         val file = File(filePath)
         val uri = FileProvider.getUriForFile(this, "${packageName}.provider", file)

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:com.github.PhilJay.MPAndroidChart="http://schemas.android.com/tools"
     android:background="@color/white">
     <!--Top Menu Bar-->
     <RelativeLayout
@@ -303,6 +304,14 @@
                 android:textAlignment="center"
                 android:textColor="@color/RegularTextColor"
                 android:theme="@style/Heading2Theme" />
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/predictionChart"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@id/predictionValue"
+                android:layout_marginTop="16dp"
+                />
 
         </RelativeLayout>
     </androidx.core.widget.NestedScrollView>
